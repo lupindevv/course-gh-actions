@@ -1,3 +1,9 @@
+name: Go Build and Test
+
+on:
+    workflow_dispatch: 
+  
+
 jobs:
   capture:
     runs-on: ubuntu-latest
