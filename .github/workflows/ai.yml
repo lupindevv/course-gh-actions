@@ -1,19 +1,36 @@
-name: OpenAI
+name: OpenAI Response to PR Comment
 
 on:
-    issue_comment: 
-        types: [created]
-permissions: 
-    pull-requests: write
+  issue_comment:
+    types: [created]
+
+permissions:
+  pull-requests: write    # Allows writing comments on pull requests
+  issues: read            # Allows reading comments on issues and pull requests
+
 jobs:
-    chat:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Debug Comment Body
-              run: echo "${{ github.event.comment.body }}"
-            - uses: ca-dp/code-butler@v1
-              with:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-                  cmd: chat
-                  comment_body: ${{ github.event.comment.body }}
+  chat:
+    runs-on: ubuntu-latest
+    steps:
+      # Step 1: Checkout the repository (if needed)
+      - name: Checkout code
+        uses: actions/checkout@v3
+   
+      # Step 3: Check if the comment body is empty
+      - name: Check if comment body is empty
+        run: |
+          if [ -z "${{ github.event.comment.body }}" ]; then
+            echo "Error: Comment body is empty!"
+            exit 1
+          else
+            echo "Comment body received: ${{ github.event.comment.body }}"
+          fi
+
+      # Step 4: Use ca-dp/code-butler@v1 to generate a response based on the comment body
+      - name: Generate Response with Code Butler
+        uses: ca-dp/code-butler@v1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}        # GitHub token for authentication
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}    # OpenAI API key for ChatGPT functionality
+          cmd: chat
+          comment_body: ${{ github.event.comment.body }}   # The comment text from the pull request
